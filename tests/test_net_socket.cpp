@@ -49,9 +49,9 @@ TEST(NetUtilsTest, CreateSocketThrowsForInvalidFamily) {
 // connect_socket()
 TEST(NetUtilsTest, ConnectSocketNormal) {
 	int listenfd = -1;
-	ASSERT_NO_THROW(
-			listenfd = net::create_socket(AF_INET, SOCK_STREAM, 0);
-	);
+	listenfd = ::socket(AF_INET, SOCK_STREAM, 0);
+	ASSERT_GE(listenfd, 0);
+
 	ScopedFd listener {listenfd};
 
 	int connfd = -1;
