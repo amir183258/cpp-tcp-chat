@@ -9,3 +9,4 @@ set(CMAKE_BUILD_TYPE debug)
 find_package(GTest REQUIRED)
 
 add_subdirectory(src/)
+add_subdirectory(tests/)
