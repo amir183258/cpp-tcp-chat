@@ -84,9 +84,9 @@ TEST(NetUtilsTest, ConnectSocketNormal) {
 			0) << "getsockname() failed: " << std::strerror(errno);
 
 	// client
-	ASSERT_EQ(
-			::connect(client.get(),
+	ASSERT_NO_THROW(
+			net::connect_socket(client.get(),
 				reinterpret_cast<sockaddr*>(&servaddr),
-				sizeof(servaddr)),
-			0) << "connect() failed: " << std::strerror(errno);
+				sizeof(servaddr)));
+}
 }
