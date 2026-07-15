@@ -1,6 +1,8 @@
 #ifndef NET_NET_UTILS_HPP
 #define NET_NET_UTILS_HPP
 
+#include <utility>
+
 #include<sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -15,7 +17,20 @@ private:
 	int fd_;
 
 public:
-	explicit ScopedFileDescriptor(int fd = -1): fd_ {fd} {}
+	explicit ScopedFileDescriptor(int fd = -1) noexcept
+		: fd_ {fd} {}
+
+	ScopedFileDescriptor(ScopedFileDescriptor &&other) noexcept
+		: fd_ {std::exchange(other.fd_, -1)} {}
+
+	ScopedFileDescriptor& operator=(ScopedFileDescriptor &&other) noexcept {
+		if (this != &other) {
+			reset();
+			fd_ = std::exchange(other.fd_, -1);
+		}
+
+		return *this;
+	}
 
 	ScopedFileDescriptor(const ScopedFileDescriptor&) = delete;
 	ScopedFileDescriptor& operator=(const ScopedFileDescriptor&) = delete;
@@ -24,9 +39,23 @@ public:
 		return fd_;
 	}
 
-	~ScopedFileDescriptor() {
+	bool valid() const noexcept {
+		return fd_ >= 0;
+	}
+
+	void reset(int fd = -1) noexcept {
 		if (fd_ >= 0)
 			::close(fd_);
+
+		fd_ = fd;
+	}
+
+	int release() noexcept {
+		return std::exchange(fd_, -1);
+	}
+
+	~ScopedFileDescriptor() {
+		reset();
 	}
 };
 
