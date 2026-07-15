@@ -5,8 +5,30 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <unistd.h>
+#include <poll.h>
 
 namespace net {
+
+class ScopedFileDescriptor {
+private:
+	int fd_;
+
+public:
+	explicit ScopedFileDescriptor(int fd = -1): fd_ {fd} {}
+
+	ScopedFileDescriptor(const ScopedFileDescriptor&) = delete;
+	ScopedFileDescriptor& operator=(const ScopedFileDescriptor&) = delete;
+
+	int get() const {
+		return fd_;
+	}
+
+	~ScopedFileDescriptor() {
+		if (fd_ >= 0)
+			::close(fd_);
+	}
+};
 
 struct SocketAddress {
 	int family = AF_INET;
@@ -29,6 +51,7 @@ int create_socket(int family, int type, int protocol = 0);
 void connect_socket(int fd, const struct sockaddr *sa, socklen_t salen);
 void bind_socket(int fd, const struct sockaddr *sa, socklen_t salen);
 void listen_socket(int fd, int backlog = SOMAXCONN);
+int poll_socket(struct pollfd *fdarray, unsigned long nfds, int timeout);
 
 // net_unix.cpp
 void close_fd(int fd);

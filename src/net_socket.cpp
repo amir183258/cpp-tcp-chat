@@ -50,4 +50,11 @@ void listen_socket(int fd, int backlog) {
 		throw std::system_error(errno, std::generic_category(), "listen() failed");
 }
 
+int poll_socket(struct pollfd *fdarray, unsigned long nfds, int timeout) {
+	int n = ::poll(fdarray, nfds, timeout);
+	if (n < 0)
+		throw std::system_error(errno, std::generic_category(), "poll() failed");
+	return n;
+}
+
 } // namespace
