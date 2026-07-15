@@ -17,6 +17,7 @@ target_link_libraries(tests_tcpchat
 ##
 add_executable(tests_net_utils
 	test_net_socket.cpp
+	test_net_unix.cpp
 )
 
 target_include_directories(tests_net_utils
