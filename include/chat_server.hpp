@@ -14,13 +14,20 @@ namespace chat {
 class ChatServer {
 private:
 	bool running = false;
-	int fd = -1;
+	net::ScopedFileDescriptor listenfd {};
 
 	net::SocketAddress address;
+
+	int backlog = 64;
 
 public:
 	ChatServer() = default;
 	explicit ChatServer(unsigned short port);
+
+	ChatServer(const ChatServer&) = delete;
+	ChatServer& operator=(const ChatServer&) = delete;
+	ChatServer(ChatServer&&) = delete;
+	ChatServer& operator=(ChatServer&&) = delete;
 
 	void run();
 
@@ -28,6 +35,8 @@ public:
 	std::string endpoint() const;
 	bool is_running() const noexcept;
 	unsigned short get_port() const noexcept;
+
+	~ChatServer() = default;
 };
 
 } // namespace

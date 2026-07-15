@@ -1,6 +1,7 @@
 #include <string>
 #include <stdexcept>
 #include <system_error>
+#include <utility>
 
 #include <sys/socket.h>
 #include <arpa/inet.h>
@@ -15,12 +16,27 @@ ChatServer::ChatServer(unsigned short port) {
 }
 
 void ChatServer::run() {
-	int listenfd = net::create_socket(address.family, SOCK_STREAM, 0);
+	if (running)
+		throw std::logic_error("server is already running");
 
 	struct sockaddr_in servaddr = address.to_sockaddr();
-	net::bind_socket(listenfd, (struct sockaddr *) &servaddr, sizeof(servaddr));
 
-	net::listen_socket(listenfd);
+	// create temporary socket
+	// cleanup is easy using RAII
+	net::ScopedFileDescriptor temp_socket {
+		net::create_socket(AF_INET, SOCK_STREAM, 0)
+	};
+
+	// bind
+	net::bind_socket(temp_socket.get(),
+			reinterpret_cast<sockaddr*>(&servaddr),
+			sizeof(servaddr));
+
+	// start listening
+	net::listen_socket(temp_socket.get(), backlog);
+
+	listenfd = std::move(temp_socket);
+	running = true;
 }
 
 // get server information
