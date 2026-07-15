@@ -39,6 +39,11 @@ void ChatServer::run() {
 	running = true;
 }
 
+void ChatServer::stop() {
+	listenfd.reset();
+	running = false;
+}
+
 // get server information
 std::string ChatServer::endpoint() const {
 	in_addr addr {};

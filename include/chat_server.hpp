@@ -16,7 +16,7 @@ private:
 	bool running = false;
 	net::ScopedFileDescriptor listenfd {};
 
-	net::SocketAddress address;
+	net::SocketAddress address {};
 
 	int backlog = 64;
 
@@ -30,6 +30,7 @@ public:
 	ChatServer& operator=(ChatServer&&) = delete;
 
 	void run();
+	void stop();
 
 	// get server information
 	std::string endpoint() const;
