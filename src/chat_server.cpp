@@ -40,6 +40,11 @@ void ChatServer::run() {
 		net::create_socket(AF_INET, SOCK_STREAM, 0)
 	};
 
+	// using reuse address option for socket
+	int opt = 1;
+	if (::setsockopt(temp_socket.get(), SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0)
+		throw std::runtime_error("setsockopt(SO_REUSEADDR) failed");
+
 	// bind
 	net::bind_socket(temp_socket.get(),
 			reinterpret_cast<sockaddr*>(&servaddr),
@@ -56,9 +61,10 @@ void ChatServer::run() {
 }
 
 void ChatServer::stop() {
-	listenfd.reset();
-	signalfd.reset();
 	clients.clear();
+
+	signalfd.reset();
+	listenfd.reset();
 
 	running = false;
 }
@@ -100,8 +106,6 @@ void ChatServer::event_loop() {
 			else {
 				clients.push_back(net::ScopedFileDescriptor(connfd));
 				pollfds.push_back({connfd, POLLIN, 0});
-
-				std::cout << "Client added to the server!" << std::endl;
 			}
 
 			if (--nready <= 0)
@@ -114,8 +118,6 @@ void ChatServer::event_loop() {
 			ssize_t n = net::read_fd(signalfd.get(), &siginfo, sizeof(siginfo));
 			if (n != sizeof(siginfo))
 				throw std::runtime_error("failed to read signalfd");
-
-			std::cout << "Signal is here now" << std::endl;
 
 			stop();
 			break; // get out of event loop
@@ -160,8 +162,6 @@ void ChatServer::event_loop() {
 
 					pollfds[i + 2] = pollfds.back();
 					pollfds.pop_back();
-
-					std::cout << "Client discounnected normally!" << std::endl;
 				}
 				else {
 					respond_to_client();
