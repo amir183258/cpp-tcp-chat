@@ -2,6 +2,7 @@
 #define CHAT_CHAT_SERVER_HPP
 
 #include <string>
+#include <vector>
 
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -15,13 +16,19 @@ class ChatServer {
 private:
 	bool running = false;
 	net::ScopedFileDescriptor listenfd {};
+	net::ScopedFileDescriptor signalfd {}; // for stopping event loop
+	std::vector<net::ScopedFileDescriptor> clients;
 
 	net::SocketAddress address {};
 
 	int backlog = 64;
+	int max_clients = 62; // 64 - 2: one is lsiten fd and another is signalfd
+
+	void setup_signal_fd();
+	void respond_to_client();
 
 public:
-	ChatServer() = default;
+	ChatServer();
 	explicit ChatServer(unsigned short port);
 
 	ChatServer(const ChatServer&) = delete;
@@ -31,6 +38,7 @@ public:
 
 	void run();
 	void stop();
+	void event_loop();
 
 	// get server information
 	std::string endpoint() const;
