@@ -46,14 +46,14 @@ TEST(ChatServerTest, ShutsDownOnSigint) {
 			char ready = '1';
 
 			if (::write(ready_pipe[1], &ready, 1) != 1)
-				std::_Exit(3);
+				std::exit(3);
 
 			server.event_loop();
 
-			std::_Exit(0);
+			std::exit(0);
 		}
 		catch (...) {
-			std::_Exit(2);
+			std::exit(2);
 		}
 	}
 
@@ -91,14 +91,14 @@ TEST(ChatServerTest, ClientConnects) {
 			char ready = '1';
 
 			if (::write(ready_pipe[1], &ready, 1) != 1)
-				std::_Exit(3);
+				std::exit(3);
 
 			server.event_loop();
 
-			std::_Exit(0);
+			std::exit(0);
 		}
 		catch (...) {
-			std::_Exit(2);
+			std::exit(2);
 		}
 	}
 
@@ -132,7 +132,6 @@ TEST(ChatServerTest, ClientConnects) {
 	ASSERT_EQ(WEXITSTATUS(status), 0);
 }
 
-/* TODO work on this
 TEST(ChatServerTest, MoreThanMaxClientsConnectToServer) {
 	int ready_pipe[2];
 	ASSERT_EQ(::pipe(ready_pipe), 0);
@@ -151,15 +150,14 @@ TEST(ChatServerTest, MoreThanMaxClientsConnectToServer) {
 			char ready = '1';
 
 			if (::write(ready_pipe[1], &ready, 1) != 1)
-				std::_Exit(3);
+				std::exit(3);
 
 			server.event_loop();
 
-			std::cout << "The loop is broken" << std::endl;
-			std::_Exit(0);
+			std::exit(0);
 		}
 		catch (...) {
-			std::_Exit(2);
+			std::exit(2);
 		}
 	}
 
@@ -221,8 +219,6 @@ TEST(ChatServerTest, MoreThanMaxClientsConnectToServer) {
 	ASSERT_EQ(WEXITSTATUS(status), 0);
 }
 
-*/
-
 // endpoint()
 TEST(ChatServerTest, EndpointString) {
 	chat::ChatServer server {9000};
@@ -236,7 +232,7 @@ TEST(ChatServerTest, EndpointString) {
 // run()
 TEST(ChatServerTest, RunNormal) {
 	chat::ChatServer server {};
-server.run();
+	server.run();
 }
 
 TEST(ChatServerTest, RunTwiceReturnThrows) {
