@@ -33,3 +33,33 @@ target_link_libraries(tests_net_utils
 	GTest::Main
 	pthread
 )
+
+##
+
+add_executable(test_server
+	test_server_client_connection/test_server.cpp
+)
+
+target_include_directories(test_server
+	PRIVATE
+	${CMAKE_SOURCE_DIR}/include
+)
+
+target_link_libraries(test_server
+	tcpchat
+)
+
+##
+
+add_executable(test_client
+	test_server_client_connection/test_client.cpp
+)
+
+target_include_directories(test_client
+	PRIVATE
+	${CMAKE_SOURCE_DIR}/include
+)
+
+target_link_libraries(test_client
+	tcpchat
+)
