@@ -245,3 +245,16 @@ TEST(NetUtilsTest, InetPtonSocketThrows) {
 			std::system_error
 	);
 }
+
+// is_valid_ip4()
+TEST(NetUtilsTest, IsValidIp4Normal) {
+	std::string ip {"105.234.22.45"};
+
+	ASSERT_TRUE(net::is_valid_ip4(ip));
+}
+
+TEST(NetUtilsTest, IsValidIp4OnWrongIp) {
+	std::string ip {"105.260.22.45"};
+
+	ASSERT_FALSE(net::is_valid_ip4(ip));
+}
