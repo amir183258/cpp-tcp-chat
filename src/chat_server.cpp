@@ -180,7 +180,7 @@ void ChatServer::event_loop() {
 // get server information
 std::string ChatServer::endpoint() const {
 	in_addr addr {};
-	addr.s_addr = htonl(address.ip_address);
+	addr.s_addr = ::htonl(address.ip_address);
 
 	char buf[INET_ADDRSTRLEN] {};
 	if(inet_ntop(address.family, &addr, buf, sizeof(buf)) == nullptr)
