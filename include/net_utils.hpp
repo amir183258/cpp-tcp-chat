@@ -87,6 +87,9 @@ void close_fd(int fd);
 ssize_t read_fd(int fd, void *ptr, size_t nbytes);
 void write_fd(int fd, void *ptr, size_t nbytes);
 
+// net_io.cpp
+void write_full(int fd, void *ptr, size_t nbytes);
+
 } // namespace
 
 #endif
