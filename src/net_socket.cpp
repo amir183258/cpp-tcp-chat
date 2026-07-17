@@ -57,4 +57,10 @@ int poll_socket(struct pollfd *fdarray, unsigned long nfds, int timeout) {
 	return n;
 }
 
+void inet_pton_socket(int family, const char *strptr, void *addrptr) {
+	int n;
+	if ( (n = ::inet_pton(family, strptr, addrptr)) <= 0)
+		throw std::system_error(errno, std::generic_category(), "inet_pton() failed");
+}
+
 } // namespace
