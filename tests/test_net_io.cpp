@@ -39,3 +39,34 @@ TEST(NetUtilsTest, WriteFullThrowsOnBadFileDescriptor) {
 			std::system_error
 	);
 }
+
+// read_full()
+TEST(NetUtilsTest, ReadFullFromAFileDescriptorNormal) {
+	int fds[2];
+	ASSERT_EQ(::pipe(fds), 0)
+		<< "pipe() failed: " << std::strerror(errno);
+
+	ScopedFd read_fd {fds[0]};
+	ScopedFd write_fd {fds[1]};
+
+	std::string str = "Hello, World!";
+	ASSERT_NO_THROW(
+			::write(write_fd.get(), str.data(), str.size())
+	);
+
+	char read_buffer[32];
+	ASSERT_EQ(
+			net::read_full(read_fd.get(), &read_buffer, str.size()),
+			str.size()
+	);
+	read_buffer[str.size()] = '\0';
+
+	ASSERT_EQ(std::string(read_buffer), str);
+}
+
+TEST(NetUtilsTest, ReadFullThrowsOnBadFileDescriptor) {
+	ASSERT_THROW(
+			net::read_full(-1, nullptr, 2),
+			std::system_error
+	);
+}
