@@ -219,6 +219,86 @@ TEST(ChatServerTest, MoreThanMaxClientsConnectToServer) {
 	ASSERT_EQ(WEXITSTATUS(status), 0);
 }
 
+// respond_to_client()
+TEST(ChatServerTest, ServerRespondToCLientNormal) {
+	// create server in a child process
+	int ready_pipe[2];
+	ASSERT_EQ(::pipe(ready_pipe), 0);
+
+	pid_t pid = ::fork();
+	ASSERT_NE(pid, -1);
+
+	// child code
+	if (pid == 0) {
+		::close(ready_pipe[0]); // child does not read
+
+		try {
+			chat::ChatServer server {};
+			server.run();
+
+			char ready = '1';
+
+			if (::write(ready_pipe[1], &ready, 1) != 1)
+				std::exit(3);
+
+			server.event_loop();
+
+			std::exit(0);
+		}
+		catch (...) {
+			std::exit(2);
+		}
+	}
+
+	// parent again
+	::close(ready_pipe[1]); // parent does not write
+
+	char ready = 0;
+	ASSERT_EQ(::read(ready_pipe[0], &ready, 1), 1);
+	ASSERT_EQ(ready, '1');
+
+	struct sockaddr_in servaddr {};
+	servaddr.sin_family = AF_INET;
+	servaddr.sin_port = htons(9877);
+	ASSERT_GE(::inet_pton(AF_INET, "127.0.0.1", &servaddr.sin_addr), 0);
+
+	// clients connects
+	int client_fd1;
+	int client_fd2;
+
+	client_fd1 = ::socket(AF_INET, SOCK_STREAM, 0);
+	ASSERT_GE(client_fd1, 0);
+	ASSERT_EQ(::connect(client_fd1, reinterpret_cast<struct sockaddr*>(&servaddr),
+				sizeof(servaddr)), 0);
+
+	client_fd2 = ::socket(AF_INET, SOCK_STREAM, 0);
+	ASSERT_GE(client_fd2, 0);
+	ASSERT_EQ(::connect(client_fd2, reinterpret_cast<struct sockaddr*>(&servaddr),
+				sizeof(servaddr)), 0);
+
+	// write to server
+	std::string message {"Hello, World!"};
+	ASSERT_GE(::write(client_fd1, message.data(), message.size()), 0);
+
+	// read response
+	char buffer[1024];
+	ASSERT_GE(::read(client_fd2, &buffer, sizeof(buffer)), 0);
+
+	ASSERT_EQ(strcmp(message.data(), buffer), 0);
+
+	ASSERT_EQ(::close(client_fd1), 0);
+	ASSERT_EQ(::close(client_fd2), 0);
+
+	// kill child process
+	ASSERT_EQ(::kill(pid, SIGINT), 0);
+
+	int status = 0;
+	ASSERT_EQ(::waitpid(pid, &status, 0), pid);
+
+	ASSERT_TRUE(WIFEXITED(status));
+	ASSERT_EQ(WEXITSTATUS(status), 0);
+}
+
 // endpoint()
 TEST(ChatServerTest, EndpointString) {
 	chat::ChatServer server {9000};
