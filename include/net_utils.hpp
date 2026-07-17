@@ -82,6 +82,7 @@ void bind_socket(int fd, const struct sockaddr *sa, socklen_t salen);
 void listen_socket(int fd, int backlog = SOMAXCONN);
 int poll_socket(struct pollfd *fdarray, unsigned long nfds, int timeout);
 void inet_pton_socket(int family, const char *strptr, void *addrptr);
+bool is_valid_ip4(const std::string& ip);
 
 // net_unix.cpp
 void close_fd(int fd);

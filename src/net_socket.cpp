@@ -63,4 +63,9 @@ void inet_pton_socket(int family, const char *strptr, void *addrptr) {
 		throw std::system_error(errno, std::generic_category(), "inet_pton() failed");
 }
 
+bool is_valid_ip4(const std::string& ip) {
+	in_addr addr {};
+	return ::inet_pton(AF_INET, ip.c_str(), &addr) == 1;
+}
+
 } // namespace
