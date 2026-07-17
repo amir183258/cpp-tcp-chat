@@ -221,3 +221,27 @@ TEST(NetUtilsTest, PollSocketThrows) {
 			std::system_error
 	);
 }
+
+// inet_pton_socket()
+TEST(NetUtilsTest, InetPtonSocketNormal) {
+	std::string ipv4_address {"192.168.1.2"};
+
+	struct sockaddr_in result_addr {};
+	
+	ASSERT_NO_THROW(
+			net::inet_pton_socket(AF_INET, ipv4_address.c_str(),
+				reinterpret_cast<struct sockaddr*>(&result_addr));
+	);
+}
+
+TEST(NetUtilsTest, InetPtonSocketThrows) {
+	std::string ipv4_address {"Hello, World!"};
+
+	struct sockaddr_in result_addr {};
+	
+	ASSERT_THROW(
+			net::inet_pton_socket(AF_INET, ipv4_address.c_str(),
+				reinterpret_cast<struct sockaddr*>(&result_addr)),
+			std::system_error
+	);
+}
