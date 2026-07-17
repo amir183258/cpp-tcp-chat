@@ -18,13 +18,13 @@
 namespace chat {
 
 ChatServer::ChatServer() {
+	// 1 for listening fd and 1 for signal fd
 	clients.reserve(static_cast<std::size_t>(max_clients + 2));
 }
 
 ChatServer::ChatServer(unsigned short port)
 	: ChatServer()
 {
-
 	address.port = port;
 }
 
@@ -77,7 +77,7 @@ void ChatServer::event_loop() {
 	pollfds.reserve(static_cast<std::size_t>(max_clients + 2));
 
 	int connfd; // accepted client fd
-	char buffer[1024]; // read buffer
+	char buffer[buffer_size]; // read buffer
 	int n; // read size
 	int nready; // number of ready poll fds
 	short int revents; // poll events
@@ -164,7 +164,7 @@ void ChatServer::event_loop() {
 					pollfds.pop_back();
 				}
 				else {
-					respond_to_client();
+					respond_to_client(i, buffer, sizeof(buffer));
 					i++;
 				}
 
@@ -218,9 +218,19 @@ void ChatServer::setup_signal_fd() {
 	signalfd = net::ScopedFileDescriptor {fd};
 }
 
-// TODO respond to client
-void ChatServer::respond_to_client() {
+void ChatServer::respond_to_client(int sender_index, const char *buffer, size_t buffer_len) {
+	for (int i = 0; i < clients.size(); i++) {
+		// do nothing for the sender client
+		if (i == sender_index)
+			continue;
 
+		// do nothing if client fd is not valid
+		if (clients[i].get() < 0)
+			continue;
+
+		net::write_full(clients[i].get(),
+				reinterpret_cast<const void *>(buffer), buffer_len);
+	}
 }
 
 } // namespace
