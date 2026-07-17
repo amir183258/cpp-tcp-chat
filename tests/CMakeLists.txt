@@ -14,11 +14,14 @@ target_link_libraries(tests_tcpchat
 	GTest::Main
 	pthread
 )
+
 ##
+
 add_executable(tests_net_utils
 	test_net_utils.cpp
 	test_net_socket.cpp
 	test_net_unix.cpp
+	test_net_io.cpp
 )
 
 target_include_directories(tests_net_utils
