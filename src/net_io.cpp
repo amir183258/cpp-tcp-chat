@@ -31,7 +31,7 @@ static ssize_t writen(int fd, const void *vptr, size_t n) {
 	return n;
 }
 
-void write_full(int fd, void *ptr, size_t nbytes) {
+void write_full(int fd, const void *ptr, size_t nbytes) {
 	if (writen(fd, ptr, nbytes) != nbytes)
 		throw std::system_error(errno, std::generic_category(), "write() failed");
 }
