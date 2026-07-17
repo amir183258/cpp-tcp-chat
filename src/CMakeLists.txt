@@ -1,5 +1,6 @@
 add_library(tcpchat
 	chat_server.cpp
+	chat_client.cpp
 
 	net_socket.cpp
 	net_unix.cpp
