@@ -3,6 +3,7 @@ add_library(tcpchat
 
 	net_socket.cpp
 	net_unix.cpp
+	net_io.cpp
 )
 
 target_include_directories(tcpchat PUBLIC
