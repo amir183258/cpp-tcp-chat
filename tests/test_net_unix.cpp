@@ -85,12 +85,12 @@ TEST(NetUtilsTest, WriteFileDescriptorNormal) {
 	ASSERT_EQ(::pipe(fds), 0)
 		<< "pipe() failed: " << std::strerror(errno);
 
+	ScopedFd first_fd {fds[0]};
 	ScopedFd second_fd {fds[1]};
-	::close(fds[0]);
 
-	char buffer[] = "Hello";
+	std::string str = "Hello, World!";
 	ASSERT_NO_THROW(
-			net::write_fd(fds[1], buffer, sizeof(buffer));
+			net::write_fd(fds[1], str.data(), str.size());
 	);
 }
 
