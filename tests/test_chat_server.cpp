@@ -277,7 +277,7 @@ TEST(ChatServerTest, ServerRespondToCLientNormal) {
 				sizeof(servaddr)), 0);
 
 	// write to server
-	std::string message {"Hello, World!"};
+	std::string message {"Hello, World!\n"};
 	ASSERT_GE(::write(client_fd1, message.data(), message.size()), 0);
 
 	// read response
