@@ -14,20 +14,31 @@ namespace chat {
 
 class ChatServer {
 private:
+	static constexpr unsigned int buffer_size = 1024;
+	struct ClientInfo {
+		net::ScopedFileDescriptor fd;
+		
+		char buffer[buffer_size];
+		int start = 0;
+		int end = 0;
+
+		ClientInfo(int fd_):
+			fd {fd_}
+		{}
+	};
+
 	bool running = false;
 	net::ScopedFileDescriptor listenfd {};
 	net::ScopedFileDescriptor signalfd {}; // for stopping event loop
-	std::vector<net::ScopedFileDescriptor> clients;
+	std::vector<ClientInfo> clients;
 
 	net::SocketAddress address {};
 
 	int backlog = 64;
 	int max_clients = 62; // 64 - 2: one is lsiten fd and another is signalfd
 
-	static constexpr unsigned int buffer_size = 1024;
-
 	void setup_signal_fd();
-	void respond_to_client(int sender_index, const char *buffer, size_t buffer_len);
+	void respond_to_client(int sender_index, char *buffer, size_t buffer_len);
 
 public:
 	ChatServer();
