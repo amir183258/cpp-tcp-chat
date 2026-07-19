@@ -1,6 +1,7 @@
 add_executable(tests_tcpchat
 	test_chat_server.cpp
 	test_chat_client.cpp
+	test_protocol_buffer.cpp
 )
 
 target_include_directories(tests_tcpchat
