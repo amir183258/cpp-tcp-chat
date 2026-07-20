@@ -220,7 +220,7 @@ TEST(ChatServerTest, MoreThanMaxClientsConnectToServer) {
 }
 
 // respond_to_client()
-TEST(ChatServerTest, ServerRespondToCLientNormal) {
+TEST(ChatServerTest, ServerRespondToClientNormal) {
 	// create server in a child process
 	int ready_pipe[2];
 	ASSERT_EQ(::pipe(ready_pipe), 0);
@@ -277,14 +277,18 @@ TEST(ChatServerTest, ServerRespondToCLientNormal) {
 				sizeof(servaddr)), 0);
 
 	// write to server
-	std::string message {"Hello, World!\n"};
+	std::string message {"Amir\nHello, World!\n"};
 	ASSERT_GE(::write(client_fd1, message.data(), message.size()), 0);
+
+	std::cout << "hi there" << std:: endl;
 
 	// read response
 	char buffer[1024];
-	ASSERT_GE(::read(client_fd2, &buffer, sizeof(buffer)), 0);
+	int n;
+	ASSERT_GE(n = ::read(client_fd2, &buffer, sizeof(buffer)), 0);
+	std::cout << "hi there" << std:: endl;
 
-	ASSERT_EQ(strcmp(message.data(), buffer), 0);
+	ASSERT_EQ(strcmp("Hello, World!\n", buffer), 0);
 
 	ASSERT_EQ(::close(client_fd1), 0);
 	ASSERT_EQ(::close(client_fd2), 0);
