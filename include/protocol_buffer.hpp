@@ -1,6 +1,8 @@
 #ifndef PROTOCOL_BUFFER_HPP
 #define PROTOCOL_BUFFER_HPP
 
+#include <string>
+
 namespace protocol {
 
 static constexpr int buffer_size = 1024;
@@ -27,6 +29,12 @@ public:
 	int size() const;
 	char* data();
 	void append(const char *other, const int len);
+	std::string consume_once(const char delim);
+	std::string consume_once();
+	std::string consume_full(const char delim);
+	std::string consume_full();
+	void consume_once(int fd, const char delim);
+	void consume_once(int fd);
 	void consume_full(int fd, const char delim);
 	void consume_full(int fd);
 	int free_space() const;

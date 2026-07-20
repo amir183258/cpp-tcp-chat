@@ -1,3 +1,4 @@
+#include <string>
 #include <stdexcept>
 #include <cstring>
 
@@ -31,6 +32,51 @@ void Buffer::append(const char *other, const int len) {
 
 	std::memcpy(buffer + size_, other, len);
 	size_ += len;
+}
+
+std::string Buffer::consume_once(const char delim) {
+	int delim_idx = find_delim(delim);
+
+	if (delim_idx < 0)
+		return "";
+
+	int len = delim_idx + 1;
+
+	std::string result(buffer, len);
+
+	compact(len);
+
+	return result;
+}
+
+std::string Buffer::consume_once() {
+	return consume_once('\n');
+}
+
+
+std::string Buffer::consume_full(const char delim) {
+	std::string chunk;
+	std::string result = "";
+	while( (chunk = consume_once(delim)) != "")
+		result += chunk;
+
+	return result;
+}
+
+std::string Buffer::consume_full() {
+	return consume_full('\n');
+}
+
+void Buffer::consume_once(int fd, const char delim) {
+	int delim_idx = find_delim(delim);
+	if (delim_idx >= 0) {
+		net::write_full(fd, buffer, delim_idx + 1);
+		compact(delim_idx + 1);
+	}
+}
+
+void Buffer::consume_once(int fd) {
+	consume_once(fd, '\n');
 }
 
 void Buffer::consume_full(int fd, const char delim) {
