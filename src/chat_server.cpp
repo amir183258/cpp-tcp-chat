@@ -78,7 +78,6 @@ void ChatServer::event_loop() {
 	pollfds.reserve(static_cast<std::size_t>(max_clients + 2));
 
 	int connfd; // accepted client fd
-	char buffer[buffer_size]; // read buffer
 	int n; // read size
 	int nready; // number of ready poll fds
 	short int revents; // poll events
@@ -105,7 +104,7 @@ void ChatServer::event_loop() {
 			if (clients.size() >= max_clients)
 				net::close_fd(connfd);
 			else {
-				clients.push_back({connfd});
+				clients.push_back({connfd, "NoName"});
 				pollfds.push_back({connfd, POLLIN, 0});
 			}
 
@@ -144,8 +143,9 @@ void ChatServer::event_loop() {
 			// client is ready to be read
 			if (revents & POLLIN) {
 				n = net::read_fd(clients[i].fd.get(),
-						clients[i].buffer + clients[i].end,
-						sizeof(clients[i].buffer) - clients[i].end);
+						clients[i].buffer.data(),
+						clients[i].buffer.free_space());
+						
 				if (n < 0) {
 					// connection reset by client
 					if (errno == ECONNRESET) {
@@ -167,9 +167,15 @@ void ChatServer::event_loop() {
 					pollfds.pop_back();
 				}
 				else {
-					clients[i].end += n;
+					clients[i].buffer.increase_size(n);
 
-					respond_to_client(i, clients[i].buffer, sizeof(clients[i].buffer));
+					if (!clients[i].connected) {
+						get_client_name(i);
+						clients[i].connected = true;
+					}
+
+					if (clients[i].connected)
+						respond_to_client(i);
 					i++;
 				}
 
@@ -223,53 +229,26 @@ void ChatServer::setup_signal_fd() {
 	signalfd = net::ScopedFileDescriptor {fd};
 }
 
-void ChatServer::respond_to_client(int sender_index, char *buffer, size_t buffer_len) {
-	int last_endline_idx = -1;
-	int start = clients[sender_index].start;
-	int end = clients[sender_index].end - 1;
-	while (start <= end) {
-		if (buffer[end] == '\n') {
-			last_endline_idx = end;
-			break;
-		}
-
-		--end;
-	}
-
-	if (last_endline_idx == -1 && clients[sender_index].end - clients[sender_index].start == buffer_len) {
-		clients[sender_index].start = 0;
-		clients[sender_index].end= 0;
-
+void ChatServer::respond_to_client(int sender_index) {
+	std::string messages = clients[sender_index].buffer.consume_full();
+	if (messages == "")
 		return;
-	}
 
-	if (last_endline_idx != -1) {
-		int send_start = clients[sender_index].start;
-		int send_len = last_endline_idx - send_start + 1;
-
-		for (int i = 0; i < clients.size(); i++) {
-			// do nothing for the sender client
-			if (i == sender_index)
-				continue;
-
-			
-
+	for (int i = 0; i < clients.size(); i++) {
+		if (i != sender_index)
 			net::write_full(clients[i].fd.get(),
-					reinterpret_cast<const void *>(buffer + send_start), send_len);
-		}
+					reinterpret_cast<const void *>(messages.data()),
+					messages.size());
 	}
+}
 
-	int old_end = clients[sender_index].end;
-	int new_start = (last_endline_idx != -1) ?
-		last_endline_idx + 1 : clients[sender_index].start;
+void ChatServer::get_client_name(int sender_index) {
+	std::string str = clients[sender_index].buffer.consume_once();
 
-	int remaining_len = old_end - new_start;
+	if (str == "")
+		return;
 
-	if (remaining_len > 0 && new_start > 0)
-		memmove(buffer, buffer + new_start, remaining_len);
-
-	clients[sender_index].start = 0;
-	clients[sender_index].end = remaining_len;
+	clients[sender_index].name = str;
 }
 
 } // namespace

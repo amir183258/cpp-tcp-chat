@@ -9,21 +9,23 @@
 #include <arpa/inet.h>
 
 #include "net_utils.hpp"
+#include "protocol_buffer.hpp"
 
 namespace chat {
 
 class ChatServer {
 private:
-	static constexpr unsigned int buffer_size = 1024;
 	struct ClientInfo {
 		net::ScopedFileDescriptor fd;
-		
-		char buffer[buffer_size];
-		int start = 0;
-		int end = 0;
 
-		ClientInfo(int fd_):
-			fd {fd_}
+		std::string name;
+
+		protocol::Buffer buffer {};
+		
+		bool connected = false;
+
+		ClientInfo(int fd_, std::string name_):
+			fd {fd_}, name {name_}
 		{}
 	};
 
@@ -38,7 +40,8 @@ private:
 	int max_clients = 62; // 64 - 2: one is lsiten fd and another is signalfd
 
 	void setup_signal_fd();
-	void respond_to_client(int sender_index, char *buffer, size_t buffer_len);
+	void respond_to_client(int sender_index);
+	void get_client_name(int sender_index);
 
 public:
 	ChatServer();
