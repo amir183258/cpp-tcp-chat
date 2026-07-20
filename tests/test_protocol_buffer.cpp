@@ -80,7 +80,71 @@ TEST(ProtocolBufferTest, AppendTooManyThrows) {
 	);
 }
 
-// consume_full()
+// std::string consume_once(const char delim)
+TEST(ProtocolBufferTest, UseConsumeOnceStringNormal) {
+	std::string text = "Hi.This is Amir.I love Pizza";
+	protocol::Buffer buffer {};
+
+	buffer.append(text.data(), text.size());
+
+	std::string result = buffer.consume_once('.');
+
+	ASSERT_EQ(result, "Hi.");
+
+	// next chunk
+	result = buffer.consume_once('.');
+	ASSERT_EQ(result, "This is Amir.");
+
+	// no next chunk
+	result = buffer.consume_once('.');
+	ASSERT_EQ(result, "");
+
+	// but still we have some chars in buffer
+	ASSERT_EQ(buffer.size(), 12);
+}
+
+// std::string consume_full(const char delim)
+TEST(ProtocolBufferTest, UseConsumeFullStringNormal) {
+	std::string text = "Hi.This is Amir.I love Pizza";
+	protocol::Buffer buffer {};
+
+	buffer.append(text.data(), text.size());
+
+	// All chunks
+	std::string result;
+	result = buffer.consume_full('.');
+	ASSERT_EQ(result, "Hi.This is Amir.");
+
+	// but still we have some chars in buffer
+	ASSERT_EQ(buffer.size(), 12);
+}
+
+// coid consume_once(int fd, const char delim)
+TEST(ProtocolBufferTest, ConsumeOnceOnAFileDescriptor) {
+	int fds[2];
+	ASSERT_EQ(::pipe(fds), 0);
+
+	int read_fd = fds[0];
+	int write_fd = fds[1];
+
+	std::string text = "Hi.This is Amir.I love Pizza";
+	protocol::Buffer buffer {};
+
+	buffer.append(text.data(), text.size());
+
+	ASSERT_NO_THROW(buffer.consume_full(write_fd, '.'));
+
+	// check read_fd 
+	char read_buffer [256];
+	int n;
+	ASSERT_GE(n = ::read(read_fd, read_buffer, 256), 0);
+
+	read_buffer[n] = '\0'; // we have to add this at the end of read_buffer
+
+	ASSERT_EQ(strcmp(read_buffer, "Hi.This is Amir."), 0);
+}
+
+// void consume_full(int fd, const char delim)
 TEST(ProtocolBufferTest, EmptyBufferConsumesNothing) {
 	int fds[2];
 	ASSERT_EQ(::pipe(fds), 0);
