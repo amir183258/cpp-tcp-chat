@@ -7,6 +7,40 @@
 
 namespace protocol {
 
+// copy constructor and assignment
+Buffer::Buffer(const Buffer &other) {
+	std::memcpy(buffer, other.buffer, other.size_);
+	size_ = other.size_;
+}
+
+Buffer& Buffer::operator=(const Buffer &other) {
+	if (this != &other) {
+		std::memcpy(buffer, other.buffer, other.size_);
+		size_ = other.size_;
+	}
+
+	return *this;
+}
+
+// move constructor and assignment
+Buffer::Buffer(Buffer &&other) {
+	std::memcpy(buffer, other.buffer, other.size_);
+	size_ = other.size_;
+
+	other.size_ = 0;
+}
+
+Buffer& Buffer::operator=(Buffer &&other) {
+	if (this != &other) {
+		std::memcpy(buffer, other.buffer, other.size_);
+		size_ = other.size_;
+
+		other.size_ = 0;
+	}
+
+	return *this;
+}
+
 void Buffer::clear() {
 	size_ = 0;
 }
@@ -17,6 +51,13 @@ int Buffer::capacity() const {
 
 int Buffer::size() const {
 	return size_;
+}
+
+void Buffer::increase_size(int n) {
+	if (n > free_space())
+		throw std::length_error("Buffer::increase_size(): not enough free space");
+
+	size_ += n;
 }
 
 char* Buffer::data() {
@@ -52,7 +93,6 @@ std::string Buffer::consume_once(const char delim) {
 std::string Buffer::consume_once() {
 	return consume_once('\n');
 }
-
 
 std::string Buffer::consume_full(const char delim) {
 	std::string chunk;

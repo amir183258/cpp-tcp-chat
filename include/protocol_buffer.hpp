@@ -19,14 +19,15 @@ private:
 public:
 	Buffer() = default;
 
-	Buffer(const Buffer&) = delete;
-	Buffer& operator=(const Buffer&) = delete;
-	Buffer(Buffer&&) = delete;
-	Buffer& operator=(Buffer&&) = delete;
+	Buffer(const Buffer&);
+	Buffer& operator=(const Buffer&);
+	Buffer(Buffer&&);
+	Buffer& operator=(Buffer&&);
 
 	void clear();
 	int capacity() const;
 	int size() const;
+	void increase_size(int n);
 	char* data();
 	void append(const char *other, const int len);
 	std::string consume_once(const char delim);
