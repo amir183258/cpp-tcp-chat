@@ -283,8 +283,9 @@ TEST(ChatServerTest, ServerRespondToClientNormal) {
 	// read response
 	char buffer[1024];
 	int n;
+
 	ASSERT_GE(n = ::read(client_fd2, &buffer, sizeof(buffer)), 0);
-	std::cout << buffer << std::endl;
+	buffer[n] = '\0';
 
 	ASSERT_EQ(strcmp("[Amir]: Hello, World!\n", buffer), 0);
 
