@@ -169,10 +169,8 @@ void ChatServer::event_loop() {
 				else {
 					clients[i].buffer.increase_size(n);
 
-					if (!clients[i].connected) {
+					if (!clients[i].connected)
 						get_client_name(i);
-						clients[i].connected = true;
-					}
 
 					if (clients[i].connected)
 						respond_to_client(i);
@@ -180,7 +178,7 @@ void ChatServer::event_loop() {
 				}
 
 				if (--nready <= 0)
-					break; // no more readable desciptors
+					break; // no more readable descriptors
 			}
 			else
 				i++;
@@ -234,6 +232,8 @@ void ChatServer::respond_to_client(int sender_index) {
 	if (messages == "")
 		return;
 
+	messages = "[" + clients[sender_index].name + "]: " + messages;
+
 	for (int i = 0; i < clients.size(); i++) {
 		if (i != sender_index)
 			net::write_full(clients[i].fd.get(),
@@ -249,6 +249,9 @@ void ChatServer::get_client_name(int sender_index) {
 		return;
 
 	clients[sender_index].name = str;
+	clients[sender_index].name.pop_back(); // remove last \n character
+
+	clients[sender_index].connected = true;
 }
 
 } // namespace
