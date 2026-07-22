@@ -68,3 +68,17 @@ target_include_directories(test_client
 target_link_libraries(test_client
 	tcpchat
 )
+
+##
+add_executable(test_client2
+	test_server_client_connection/test_client2.cpp
+)
+
+target_include_directories(test_client2
+	PRIVATE
+	${CMAKE_SOURCE_DIR}/include
+)
+
+target_link_libraries(test_client2
+	tcpchat
+)
