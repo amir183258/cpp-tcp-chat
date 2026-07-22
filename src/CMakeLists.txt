@@ -12,3 +12,17 @@ add_library(tcpchat
 target_include_directories(tcpchat PUBLIC
 	${CMAKE_SOURCE_DIR}/include
 )
+
+##
+add_executable(chat
+	tcpchat.cpp
+)
+
+target_include_directories(chat
+	PRIVATE
+	${CMAKE_SOURCE_DIR}/include
+)
+
+target_link_libraries(chat
+	tcpchat
+)
