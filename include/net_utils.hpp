@@ -1,6 +1,7 @@
 #ifndef NET_NET_UTILS_HPP
 #define NET_NET_UTILS_HPP
 
+#include <string>
 #include <utility>
 
 #include<sys/types.h>
