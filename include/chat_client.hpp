@@ -4,20 +4,26 @@
 #include <string>
 
 #include "net_utils.hpp"
+#include "protocol_buffer.hpp"
 
 namespace chat {
 
 class ChatClient {
 private:
 	bool connected = false;
+
 	net::ScopedFileDescriptor client_fd {};
+	net::ScopedFileDescriptor signalfd {};
 
 	net::SocketAddress address {};
 
-	static constexpr unsigned int buffer_size = 1024;
-
 	static constexpr unsigned int max_name_len = 32;
 	std::string client_name = "No Name";
+
+	protocol::Buffer read_buffer {};
+	protocol::Buffer write_buffer {};
+
+	void setup_signal_fd();
 
 public:
 	ChatClient() = default;
@@ -33,6 +39,8 @@ public:
 
 	void run();
 	void stop();
+
+	void event_loop();
 
 	// get client information
 	bool is_connected() const noexcept;
