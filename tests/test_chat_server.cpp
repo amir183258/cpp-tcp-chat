@@ -280,15 +280,13 @@ TEST(ChatServerTest, ServerRespondToClientNormal) {
 	std::string message {"Amir\nHello, World!\n"};
 	ASSERT_GE(::write(client_fd1, message.data(), message.size()), 0);
 
-	std::cout << "hi there" << std:: endl;
-
 	// read response
 	char buffer[1024];
 	int n;
 	ASSERT_GE(n = ::read(client_fd2, &buffer, sizeof(buffer)), 0);
-	std::cout << "hi there" << std:: endl;
+	std::cout << buffer << std::endl;
 
-	ASSERT_EQ(strcmp("Hello, World!\n", buffer), 0);
+	ASSERT_EQ(strcmp("[Amir]: Hello, World!\n", buffer), 0);
 
 	ASSERT_EQ(::close(client_fd1), 0);
 	ASSERT_EQ(::close(client_fd2), 0);
