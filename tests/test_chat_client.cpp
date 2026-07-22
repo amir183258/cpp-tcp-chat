@@ -41,6 +41,15 @@ TEST(ChatClientTest, SetNameAfterCreatingClient) {
 	ASSERT_EQ(client.get_name(), "Amir");
 }
 
+TEST(ChatClientTest, SetInvalidNames) {
+	chat::ChatClient client {};
+
+	ASSERT_THROW(client.set_name(""), std::invalid_argument);
+
+	std::string long_invalid_name(64, 'c');
+	ASSERT_THROW(client.set_name(long_invalid_name), std::length_error);
+}
+
 // run()
 TEST(ChatClientTest, RunClientNormal) {
 	// server
